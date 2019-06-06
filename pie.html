@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style type="text/css">
+        div.h-bar { height:20px; background: blue; margin-bottom:5px }
+    </style>
+</head>
+<body>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+    var data = [
+            {
+                name: '小米',
+                value: 60.8
+            }, {
+                name: '华为',
+                value: 20.8
+            }, {
+                name: '联想',
+                value: 30.4
+            }, {
+                name: '三星',
+                value: 40.8
+            }, {
+                name: '苹果',
+                value: 90.8
+            }, {
+                name: '其他',
+                value: 100.8
+            } 
+        ];
+
+    var width = 400,
+        height = 400,
+        padding = { left:'30px', right:'30px', top:'5px', bottom:'20px' },
+        colors = d3.scaleOrdinal(d3.schemeCategory10);  // 生成一个10个元素的颜色数组
+
+    var svg = d3.select('body')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+
+    // 准备一个pie布局器, 此布局可根据原始数据计算出一段弧的开始和结束角度
+    var pie = d3.pie().sort(function(a, b) {
+        return a.value - b.value;
+    }).value(function(d) {   // 设置布局器的取值过滤器
+        return d.value
+    });
+
+    var drawData = pie(data);  // 将原始数据经过布局转换
+
+    // var colorScale = d3.scaleOrdinal().domain(d3.range(0, data.length)).range(d3.schemeCategory20c);
+    var colorScale = d3.scaleOrdinal(d3.schemeCategory20c);
+
+    var arc = d3.arc().innerRadius(0).outerRadius(Math.min(width, height)*0.8/2);
+
+    var parent = svg.append('g');
+       parent.attr('transform', 'translate(200, 200)')
+                    
+       .selectAll('path')
+       .data(drawData)
+       .enter()
+       .append('path')
+       .attr('fill', function(d, i){
+            return colorScale(d.index);
+       })
+       .attr('d', function(d) {
+        return arc(d);
+       })
+       .on('mouseover', function(){
+            d3.select(this).transition().duration(500).attr('opacity', 0.5)
+       })
+       .on('mouseout', function(){
+            d3.select(this).transition().duration(500).attr('opacity', 1);
+       })
+
+    var sum = d3.sum(data, function(d) {
+        return d.value;
+    });
+
+    var textParent = svg.append('g');
+    textParent.attr('transform', 'translate(200,200)');
+    textParent.selectAll('text')
+              .data(drawData)
+              .enter()
+              .append('text')
+              .attr('transform', function(d) {
+                return 'translate(' + arc.centroid(d) + ')';
+              })
+              .attr('text-anchor', 'middle')
+              .attr('font-size', '14px')
+              .attr('fill', 'white')
+              .text(function(d) {
+                return (d.data.value / sum*100).toFixed(2) + '%';
+              })
+
+    
+
+</script>
+</body>
+</html>

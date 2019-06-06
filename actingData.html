@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style type="text/css">
+        div { position: absolute; }
+    </style>
+</head>
+<body>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script type="text/javascript">
+    var width = 400,
+        height = 400;
+    var data = [10,15,30,50,80,65,55,30,20,10,8];
+
+    function renderData(data) {
+        var bars =  d3.select('body').selectAll('div')
+                        .data(data);
+
+            bars.enter()
+                .append('div')
+                .style('color', 'white')
+                .style('background-color', 'black')
+                .style('height', '20px')
+                .style('width', function(d){
+                    return d*5 + 'px';
+                })
+                .style('top', function(d,i){
+                    return 30*i + 'px';
+                })
+                .merge(bars)
+                .transition()
+                .duration(1500)
+                .style('width', function(d){
+                    return d*5 + 'px';
+                });
+            bars.exit().remove();
+    }
+
+    setInterval(function(){
+        data.shift();
+        data.push(Math.round(Math.random()*100));
+        renderData(data);
+    },1500)
+
+    renderData(data);
+</script>
+</body>
+</html>

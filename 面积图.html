@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style type="text/css">
+        html, body { padding:0; margin:0; }
+    </style>
+</head>
+<body>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script type="text/javascript">
+    var width = 550,
+        height = 550,
+        margin = 25,
+        xScale, yScale,
+        xAxis, yAxis, xAxisLength, yAxisLength, svg;
+
+    svg = d3.select('body').append('svg')
+            .attr('width', width)
+            .attr('height', height);
+    xScale = d3.scaleLinear().domain([0, 10]).range([0, 500]);
+    xAxis = d3.axisBottom().scale(xScale).ticks(10).tickSize(6).tickPadding(2);
+    yScale = d3.scaleLinear().domain([0, 10]).range([500, 0]);
+    yAxis = d3.axisLeft().scale(yScale).ticks(10);
+
+    var data = [
+        [
+            {x:0, y:5}, {x:1, y:9}, {x:2, y:7},
+            {x:3, y:5}, {x:4, y:3}, {x:6, y:4},
+            {x:7, y:2}, {x:8, y:3}, {x:9, y:2}
+        ],
+        d3.range(10).map(function(d) {
+            return {x:d, y:Math.sin(d) + 5}
+        })
+    ];
+
+    var colors = d3.scaleOrdinal(d3.schemeCategory10);
+
+    var chart = {
+        renderX: renderX,
+        renderY: renderY,
+        drawXLine: drawXLine,
+        drawYLine: drawYLine,
+        lineTo: lineTo,
+        renderDot: renderDot,
+        init: function() {
+            this.renderX();
+            this.renderY();
+            this.drawXLine();
+            this.drawYLine();
+            this.lineTo();
+            this.renderDot();
+
+            // setInterval(this.rescale, 2000)
+        },
+        rescale: rescale
+    };
+
+    chart.init();
+
+    function renderX() {
+        
+        svg.append('g')
+            .attr('class', 'x-axis')
+            .attr('transform','translate(' + margin + ',525' + ')').call(xAxis)
+    }
+
+    function renderY() {
+        
+        svg.append('g')
+            .attr('class', 'y-axis')
+            .attr('transform', 'translate(25, 25)')
+            .call(yAxis)
+    }
+
+    function drawXLine() {
+        d3.selectAll('g.x-axis .tick')
+            .append('line')
+            .attr('stroke', '#eee')
+            .attr('x1', 0)
+            .attr('y1', 0)
+            .attr('x2', 0)
+            .attr('y2', -500)
+    }
+
+    function drawYLine() {
+        d3.selectAll('g.y-axis .tick')
+            .append('line')
+            .attr('stroke', '#eee')
+            .attr('x1', 0)
+            .attr('y1', 0)
+            .attr('x2', 500)
+            .attr('y2', 0)
+    }
+
+    function rescale() {
+        var max = Math.round(Math.random() * 100);
+        xAxis.scale().domain([0, max]);
+        svg.select('g.x-axis').transition().call(xAxis);
+        yAxis.scale().domain([max, 0]);
+        svg.select('g.y-axis').transition().call(yAxis);
+    }
+
+    function lineTo() {
+        var line = d3.line()
+                     .x(function(d) {
+                        return xScale(d.x);
+                     })
+                     .y(function(d) {
+                        return yScale(d.y);
+                     })
+                     .curve(d3.curveCardinal.tension(0));
+        var g = svg.append('g').attr('class', 'curveline')
+                   .attr('transform', 'translate(25,25)');
+
+        var area = d3.area()
+                     .x(function(d) {
+                        return xScale(d.x);
+                     })
+                     .y0(yScale(0))
+                     .y1(function(d) {
+                        return yScale(d.y);
+                     })
+                     .curve(d3.curveCardinal.tension(0));
+
+        g.selectAll('path.curveline')
+            .data(data)
+            .enter()
+            .append('path')
+            .attr('stroke', '#ccc')
+            .attr('class', 'curveline')
+            .attr('stroke', function(d,i) {
+                return colors(i);
+            })
+            .attr('stroke-width', 1)
+            .attr('fill', 'none')
+            .attr('d', function(d) {
+                return line(d);
+            })
+
+        g.selectAll('path.area')
+            .data(data)
+            .enter()
+            .append('path')
+            .attr('fill', function(d, i){
+                return colors(i);
+            })
+            .attr('fill-opacity', 0.3)
+            .attr('d', function(d) {
+                return area(d);
+            })
+    }
+
+
+    function renderDot() {
+        data.forEach(function(list) {
+            svg.append('g')
+                .attr('transform','translate(25,25)')
+                .selectAll('circle')
+                .data(list)
+                .enter()
+                .append('circle')
+                .attr('cx', function(d) {
+                    return xScale(d.x);
+                })
+                .attr('cy', function(d) {
+                    return yScale(d.y)
+                })
+                .attr('r', 5)
+                .attr('fill', 'white')
+                .attr('stroke', function(d, i) {
+                    return colors(i);
+                })
+                .on('mouseover', function() {
+                    d3.select(this)
+                        .transition()
+                        .duration(500)
+                        .ease(d3.easeBounceOut)
+                        .attr('r', 10)
+
+                })
+                .on('mouseout', function() {
+                    d3.select(this)
+                        .transition()
+                        .duration(500)
+                        .ease(d3.easeBounceOut)
+                        .attr('r', 5)
+                })
+
+        })
+    }
+
+</script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style type="text/css">
+        div {
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+    var data = ['cat', 'dog', 'cat', 'dog', 'cat', 'dog'],
+        duration = 1500;
+
+    d3.select('body').selectAll('div')
+        .data(data)
+        .enter()
+        .append('div')
+        .style('width', '30px')
+        .style('height', '30px')
+        .style('background-color', 'blue')
+        .style('top', function(d,i){
+            return i*40 + 'px';
+        })
+        .style('color', '#fff')
+        .text(function(d,i){
+            return i;
+        })
+        .transition()
+        .duration(duration)
+        .delay(1000)
+        .style('left', '100px')
+        .on('start', function(){
+            d3.select(this).text('start')
+        })
+        .filter(function(d){
+            return d == 'dog';
+        })
+        .transition()
+        .duration(duration)
+        .delay(1000)
+        .on('start', function(){
+            d3.select(this).text('second')
+        })
+        .style('left', '500px')
+</script>
+</body>
+</html>

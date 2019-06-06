@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style type="text/css">
+        div.h-bar { height:20px; background: blue; margin-bottom:5px }
+    </style>
+</head>
+<body>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+    var width = 400,
+        height = 400,
+        fullAngle = 2*Math.PI,
+        colors = d3.scaleOrdinal(d3.schemeCategory20),
+        svg = d3.select('body').append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .attr('class', 'pie');
+
+    function render(innerRadius, endAngle) {
+        if(!endAngle) endAngle = fullAngle;
+        var data = [
+            { startAngle:0, endAngle:0.1*endAngle },
+            { startAngle:0.1*endAngle, endAngle:0.2*endAngle }
+        ];
+
+        var arc = d3.arc()
+                    .outerRadius(200)
+                    .innerRadius(0);
+        svg.select('g').remove();
+        svg.append('g')
+           .attr('transform', 'translate(200,200)')
+           .selectAll('path.arc')
+           .data(data)
+           .enter()
+           .append('path')
+           .attr('class', 'arc')
+           .attr('fill', function(d,i) {
+                return colors(i);
+           })
+           .attr('stroke-width', 4)
+           .attr('stroke', 'white')
+           .attr('d', function(d,i){
+                return arc(d,i);
+           })
+           .on('mouseover', function(){
+                d3.select(this).attr('fill', '#ff6633')
+           })
+           .on('mouseout', function() {
+                d3.select(this).attr('fill', '')
+           })
+    }
+
+    render(0);
+
+</script>
+</body>
+</html>

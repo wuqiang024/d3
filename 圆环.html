@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style type="text/css">
+        html, body { padding:0; margin:0; }
+    </style>
+</head>
+<body>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+    var width = 400,
+        height = 400,
+        fullAngle = 2 * Math.PI,
+        colors = d3.scaleOrdinal(d3.schemeCategory20);
+
+    var svg = d3.select('body').append('svg').attr('width', width).attr('height', height);
+
+    function render(innerRadius, endAngle) {
+        endAngle = endAngle?endAngle:fullAngle;
+        var data = [
+            {startAngle: 0, endAngle: 0.2 * endAngle},
+            {startAngle: 0.2 * endAngle, endAngle: 0.4 * endAngle},
+            {startAngle: 0.4 * endAngle, endAngle: 0.6 * endAngle},
+            {startAngle: 0.6 * endAngle, endAngle: 0.8 * endAngle},
+            {startAngle: 0.8 * endAngle, endAngle: 1.0 * endAngle},
+        ];
+
+        arc = d3.arc().innerRadius(innerRadius).outerRadius(100);
+        svg.select('g').remove();
+        svg.append('g')
+           .attr('transform', 'translate(' + 100 + ',' + 100 + ')')
+           .selectAll('path')
+           .data(data)
+           .enter()
+           .append('path')
+           .attr('fill', function(d, i) {
+                return colors(i);
+           })
+           .transition()
+           .duration(1000)
+           .attrTween('d', function(d) {
+                var start = {startAngle:0, endAngle:0 };
+                var interpolate = d3.interpolate(start, d);
+                return function(t) {
+                    return arc(interpolate(t))
+                }
+           })
+    }
+
+    render(50)
+    
+</script>
+</body>
+</html>

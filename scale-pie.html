@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style type="text/css">
+        div.h-bar { height:20px; background: blue; margin-bottom:5px }
+    </style>
+</head>
+<body>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+    var data = [
+            {
+                name: '小米',
+                value: 60.8
+            }, {
+                name: '华为',
+                value: 20.8
+            }, {
+                name: '联想',
+                value: 30.4
+            }, {
+                name: '三星',
+                value: 40.8
+            }, {
+                name: '苹果',
+                value: 90.8
+            }, {
+                name: '其他',
+                value: 100.8
+            } 
+        ];
+
+    var width = 400,
+        height = 400,
+        padding = { left:'30px', right:'30px', top:'5px', bottom:'20px' },
+        colors = d3.scaleOrdinal(d3.schemeCategory10);  // 生成一个10个元素的颜色数组
+
+    var svg = d3.select('body')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+
+    // 准备一个pie布局器, 此布局可根据原始数据计算出一段弧的开始和结束角度
+    var pie = d3.pie().sort(function(a, b) {
+        return a.value - b.value;
+    }).value(function(d) {   // 设置布局器的取值过滤器
+        return d.value
+    });
+
+    var drawData = pie(data);  // 将原始数据经过布局转换
+
+    var outerRadius = 200*0.8;
+
+    // var arc = d3.arc().innerRadius(0).outerRadius(100);
+
+    var scaleArc = d3.scaleLinear().domain([d3.min(data, function(d) {
+        return d.value;
+    }), d3.max(data, function(d) {
+        return d.value;
+    })]).range([outerRadius/2, outerRadius/1.2])
+
+    // var colorScale = d3.scaleOrdinal().domain(d3.range(0, data.length)).range(d3.schemeCategory20c);
+    var colorScale = d3.scaleOrdinal(d3.schemeCategory20c);
+
+    var arcs = svg.selectAll('.arcs')
+                  .data(drawData)
+                  .enter()
+                  .append('path')
+                  .attr('transform', 'translate(200,200)')
+                  .attr('fill', function(d) {
+                        return colorScale(d.index)
+                  })
+        arcs.transition()
+            .duration(100)
+            .ease(d3.easeBounceOut)
+            .delay(function(d ,i) {
+                return 50 * d.index;
+            })
+            // .attr('d', function(d, i) {
+            //       var arc = d3.arc()
+            //                   .innerRadius(0)
+            //                   .outerRadius(scaleArc(d.value));
+            //       // let interpolate = d3.interpolate({startAngle: d.startAngle, endAngle: d.startAngle}, {startAngle: d.startAngle, endAngle: d.endAngle})
+            //       //         return function (t) {
+            //       //           return arc(interpolate(t))
+            //       //         }
+            // })
+            .attr('d', function(d) {
+                var arc = d3.arc()
+                            .innerRadius(0)
+                            .outerRadius(scaleArc(d.value));
+                return arc(d);
+            });
+
+    arcs.on('mouseover', function(d, i) {
+        d3.select(this)
+          .attr('opacity', 0.7)
+          .transition()
+          .duration(200)
+          .ease(d3.easeBounceOut)
+          .attr('d', function(d,i) {
+                var arc = d3.arc().innerRadius(0).outerRadius(scaleArc(d.value) * 1.2);
+                return arc(d);
+          })
+    })
+        .on('mouseout', function(d, i){
+            d3.select(this)
+              .attr('opacity', 1)
+              .transition()
+              .duration(200)
+              .ease(d3.easeBounceOut)
+              .attr('d', function(d, i) {
+                    var arc = d3.arc().innerRadius(0).outerRadius(scaleArc(d.value));
+                    return arc(d);
+              })
+        })
+
+    
+
+</script>
+</body>
+</html>

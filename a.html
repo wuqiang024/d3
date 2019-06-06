@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style type="text/css">
+        html, body { padding:0; margin:0; }
+    </style>
+</head>
+<body>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+    var svg = d3.select('body')
+                .append('svg')
+                .attr('width', 500)
+                .attr('height', 500);
+    var colors = d3.scaleOrdinal(d3.schemeCategory20c);
+
+    svg.on('click', function() {
+        
+            var position = d3.mouse(svg.node());
+            var circle = svg.append('circle')
+                            .attr('cx', position[0])
+                            .attr('cy', position[1])
+                            .attr('r', 0)
+                            .attr('stroke-width', 5/2)
+                            .attr('fill', function(){
+                                return colors(Math.random()*20)
+                            })
+                            .transition()
+                            .ease(d3.easeQuadIn)
+                            .delay(Math.pow(2,2.5) * 50)
+                            .duration(500)
+                            .attr('r', 40)
+                            .style('stroke-opacity', 0)
+                            .transition()
+                            .duration(500)
+                            .attr('r', 0)
+                            .on('end', function(){
+                                d3.select(this).remove();
+                            })
+    })
+</script>
+</body>
+</html>
